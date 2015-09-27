@@ -9,17 +9,29 @@ public class SylkParser {
 	private Scanner sc;
 	private String keypos, entrypos;
 	private boolean keyFirst, entryFirst;
+	private File file;
 
 	public SylkParser(File f, int keypos, int entrypos) throws FileNotFoundException {
-		sc = new Scanner(f);
-		sc.useDelimiter(";");
+		this.file = f;
+		sc = new Scanner(file);
+		sc.useDelimiter(";|\r\n");
 		this.entrypos = "X" + entrypos;
 		this.keypos = "X" + keypos;
 		keyFirst = keypos == 1;
 		entryFirst = entrypos == 1;
 	}
 	
-	private Entry next(){
+	private void resetScanner(){
+		sc.close();
+		try {
+			sc = new Scanner(file);
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		}
+		sc.useDelimiter(";|\r\n");
+	}
+	
+	public Entry next(){
 		Entry res = new Entry();
 		while(true){
 			String s = sc.next();
@@ -44,10 +56,10 @@ public class SylkParser {
 	}
 	
 	public String find(String s){
+		resetScanner();
 		try{
 			while(true){
 				Entry e = next();
-				System.out.println(e);
 				if(e.id.equals(s)){
 					return e.path;
 				}
@@ -58,14 +70,12 @@ public class SylkParser {
 	}
 	
 	private String clean(String s){
-		String c = s.replace("K", "");
+		String c = s.replaceFirst("K", "");
 		c = c.replace("\"", "");
-		c = c.replace("\r", "");
-		c = c.replace("\n", "");
-		return c.replace("C", "");
+		return c.replace("\r\n", "");
 	}
 	
-	private class Entry{
+	public class Entry{
 		String id, path;
 		boolean first = true;
 		
